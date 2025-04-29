@@ -11,9 +11,9 @@ import (
 
 // Model for course -file
 type Course struct {
-	CourseId    string  `json:"courseid"`
-	CourseName  string  `json:"coursename"`
-	CoursePrice int     `json:"price"`
+	CourseId    string `json:"courseid"`
+	CourseName  string `json:"coursename"`
+	CoursePrice int    `json:"price"`
 	// Author      *Author `json:"author"`
 }
 type Author struct {
@@ -23,10 +23,7 @@ type Author struct {
 
 // fake DB
 
-
-var courses = []Course{{"adfslk", "React",199},{"flaskdjf", "Go", 299},}
-
-
+var courses = []Course{{"adfslk", "React", 199}, {"flaskdjf", "Go", 299}}
 
 // middleware , helper -file
 
@@ -35,13 +32,14 @@ func (c *Course) IsEmpty() bool {
 }
 
 func main() {
-	
+
 	r := mux.NewRouter()
 	// routes
 	r.HandleFunc("/", ServeHome).Methods("GET")
-	
+
 	r.HandleFunc("/getallcourses", GetAllCourses).Methods("GET")
-	
+	r.HandleFunc("/getallcourses/{id}", getOneCourse).Methods("GET")
+
 	log.Fatal(http.ListenAndServe(":4000", r))
 }
 
@@ -54,4 +52,27 @@ func GetAllCourses(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(courses)
+}
+
+func getOneCourse(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Get one course")
+
+	w.Header().Set("Content-Type", "application/json")
+
+	// grab id from request
+
+	params := mux.Vars(r)
+	id := params["id"]
+	// loop through courses, find matching id and return the response
+	// idd := params["id"]
+
+	for _, course := range courses {
+		if course.CourseId == id {
+			json.NewEncoder(w).Encode(course)
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode("No course found with given id ")
+
 }
