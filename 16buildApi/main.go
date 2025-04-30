@@ -16,8 +16,8 @@ import (
 type Course struct {
 	CourseId    string `json:"courseid"`
 	CourseName  string `json:"coursename"`
-	CoursePrice int    `json:"price"`
-	// Author      *Author `json:"author"`
+	CoursePrice int    `json:"-"`
+	Author      *Author `json:"author"`
 }
 type Author struct {
 	Fullname string `json:"fullname"`
@@ -26,7 +26,7 @@ type Author struct {
 
 // fake DB
 
-var courses = []Course{{"adfslk", "React", 199}, {"flaskdjf", "Go", 299}}
+var courses = []Course{{"1", "React", 199, &Author{"seyam", "google.com"}}, {"2", "Go", 299,&Author{"seyam", "go.dev"}}}
 
 // middleware , helper -file
 
@@ -40,11 +40,11 @@ func main() {
 	// routes
 	r.HandleFunc("/", ServeHome).Methods("GET")
 
-	r.HandleFunc("/getallcourses", GetAllCourses).Methods("GET")
-	r.HandleFunc("/getallcourses/{id}", getOneCourse).Methods("GET")
-	r.HandleFunc("/getallcourses", createOneCourse).Methods("POST")
-	r.HandleFunc("/getallcourses/{id}", updateOneCourse).Methods("POST")
-	r.HandleFunc("/getallcourses/delete/{id}", deletOneCourse).Methods("POST")
+	r.HandleFunc("/courses", GetAllCourses).Methods("GET")
+	r.HandleFunc("/course/{id}", getOneCourse).Methods("GET")
+	r.HandleFunc("/course", createOneCourse).Methods("POST")
+	r.HandleFunc("/course/{id}", updateOneCourse).Methods("PUT")
+	r.HandleFunc("/course/{id}", deletOneCourse).Methods("DELETE")
 
 	log.Fatal(http.ListenAndServe(":4000", r))
 }
@@ -84,7 +84,7 @@ func getOneCourse(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(map[string]string{
 		"error":     "course is not found",
-		"course_id": id,
+		
 	})
 
 }
@@ -96,6 +96,7 @@ func createOneCourse(w http.ResponseWriter, r *http.Request) {
 
 	if r.Body == nil {
 		json.NewEncoder(w).Encode("Please send some data")
+		return
 	}
 
 	// what about {}
@@ -158,7 +159,7 @@ func deletOneCourse(w http.ResponseWriter,r *http.Request){
 			courses = append(courses[:i], courses[i+1:]...)
 			json.NewEncoder(w).Encode(map[string]string{
 				"deleted course_id" : id,
-				"error" : "Course Deleted",
+				"msg" : "Course Deleted",
 
 			})
 			return
